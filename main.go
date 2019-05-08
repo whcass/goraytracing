@@ -2,6 +2,7 @@ package main
 
 import (
 	"io/ioutil"
+	"math"
 	"strconv"
 )
 
@@ -11,9 +12,28 @@ func check(e error) {
 	}
 }
 
+func hitSphere(center Vector, radius float64, r Ray) float64 {
+	oc := r.origin().Sub(center)
+	a := r.direction().Dot(r.direction())
+	b := 2.0 * oc.Dot(r.direction())
+	c := oc.Dot(oc) - radius*radius
+	discriminant := b*b - 4*a*c
+	if discriminant < 0 {
+		return -1.0
+	} else {
+		return (-b - math.Sqrt(discriminant)) / (2.0 * a)
+	}
+
+}
+
 func colour(r Ray) Vector {
+	t := hitSphere(Vector{0, 0, -1}, 0.5, r)
+	if t > 0.0 {
+		N := r.pointAt(t).Sub(Vector{0, 0, -1}).Normalize()
+		return Vector{N.X + 1, N.Y + 1, N.Z + 1}.MultiplyByScalar(0.5)
+	}
 	unitDir := r.direction().Normalize()
-	t := 0.5 * (unitDir.Y + 1.0)
+	t = 0.5 * (unitDir.Y + 1.0)
 	colour := Vector{1.0, 1.0, 1.0}.MultiplyByScalar(1.0 - t)
 	colour = colour.Add(Vector{0.5, 0.7, 1.0}.MultiplyByScalar(t))
 	return colour
