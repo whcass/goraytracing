@@ -5,6 +5,7 @@ import "math"
 type Sphere struct {
 	Center Vector
 	r      float64
+	mat    Material
 }
 
 func (s Sphere) hitSphere(r Ray, min float64, max float64) (bool, float64, Vector, Vector) {
@@ -14,14 +15,14 @@ func (s Sphere) hitSphere(r Ray, min float64, max float64) (bool, float64, Vecto
 	c := oc.Dot(oc) - s.r*s.r
 	discriminant := b*b - a*c
 	if discriminant > 0 {
-		temp := (-b - math.Sqrt(b*b-a*c)) / a
+		temp := (-b - math.Sqrt(discriminant)) / a
 		if temp < max && temp > min {
 			t := temp
 			p := r.pointAt(t)
 			N := p.Sub(s.Center).MultiplyByScalar(1 / s.r)
 			return true, t, p, N
 		}
-		temp = (-b + math.Sqrt(b*b-a*c)) / a
+		temp = (-b + math.Sqrt(discriminant)) / a
 		if temp < max && temp > min {
 			t := temp
 			p := r.pointAt(t)

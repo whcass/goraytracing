@@ -18,6 +18,14 @@ func (a Vector) Sub(b Vector) Vector {
 	}
 }
 
+func (a Vector) SubByScalar(s float64) Vector {
+	return Vector{
+		X: a.X - s,
+		Y: a.Y - s,
+		Z: a.Z - s,
+	}
+}
+
 func (a Vector) MultiplyByScalar(s float64) Vector {
 	return Vector{
 		X: a.X * s,
@@ -26,8 +34,20 @@ func (a Vector) MultiplyByScalar(s float64) Vector {
 	}
 }
 
+func (a Vector) DivideByScalar(s float64) Vector {
+	return Vector{
+		X: a.X / s,
+		Y: a.Y / s,
+		Z: a.Z / s,
+	}
+}
+
 func (a Vector) Dot(b Vector) float64 {
 	return a.X*b.X + a.Y*b.Y + a.Z*b.Z
+}
+
+func (a Vector) Mult(b Vector) Vector {
+	return Vector{a.X * b.X, a.Y * b.Y, a.Z * b.Z}
 }
 
 func (a Vector) Length() float64 {

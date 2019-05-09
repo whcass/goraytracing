@@ -25,27 +25,18 @@ func RandInUnitSphere() Vector {
 	return p
 }
 
-func colour(r Ray, objs []Sphere) Vector {
-	max := math.MaxFloat64
-	min := 0.0
-	hitAnything := false
-	normal := Vector{}
-	p := Vector{}
-	for _, elem := range objs {
-		hit, t, a, N := elem.hitSphere(r, min, max)
-		if hit {
-			hitAnything = true
-			max = t
-			normal = N
-			p = a
-			//N := r.pointAt(t).Sub(Vector{0, 0, -1}).Normalize()
-			//return Vector{N.X + 1, N.Y + 1, N.Z + 1}.MultiplyByScalar(0.5)
-		}
-	}
+func colour(r Ray, objs []Sphere, depth int) Vector {
+	hitAnything, normal, p, obj := WorldHit(objs, r)
 	if hitAnything {
-		target := p.Add(normal)
-		target = target.Add(RandInUnitSphere())
-		return colour(Ray{p, target.Sub(p)}, objs).MultiplyByScalar(0.5)
+		//target := p.Add(normal)
+		//target = target.Add(RandInUnitSphere())
+		b, scattered, attenuation := obj.mat.scatter(r, p, normal)
+		if depth < 50 && b {
+			return attenuation.Mult(colour(scattered, objs, depth+1))
+		} else {
+			return Vector{0.0, 0.0, 0.0}
+		}
+		//return colour(Ray{p, target.Sub(p)}, objs).MultiplyByScalar(0.5)
 		//return Vector{normal.X + 1, normal.Y + 1, normal.Z + 1}.MultiplyByScalar(0.5)
 	} else {
 		unitDir := r.direction().Normalize()
@@ -57,10 +48,30 @@ func colour(r Ray, objs []Sphere) Vector {
 
 }
 
+func WorldHit(objs []Sphere, r Ray) (bool, Vector, Vector, Sphere) {
+	max := math.MaxFloat64
+	min := 0.0001
+	hitAnything := false
+	normal := Vector{}
+	p := Vector{}
+	obj := Sphere{}
+	for _, elem := range objs {
+		hit, t, a, N := elem.hitSphere(r, min, max)
+		if hit {
+			hitAnything = true
+			max = t
+			normal = N
+			p = a
+			obj = elem
+		}
+	}
+	return hitAnything, normal, p, obj
+}
+
 func main() {
 	nx := 800
 	ny := 400
-	ns := 100
+	ns := 200
 	d1 := []byte("P3\n" + strconv.Itoa(nx) + " " + strconv.Itoa(ny) + "\n" + strconv.Itoa(255) + "\n")
 
 	lowerLeftCorner := Vector{-2.0, -1.0, -1.0}
@@ -70,9 +81,15 @@ func main() {
 
 	camera := Camera{lowerLeftCorner, horizontal, vertical, origin}
 
-	floor := Sphere{Vector{0, -100.5, -1}, 100}
-	main := Sphere{Vector{0, 0, -1}, 0.5}
-	sphereList := []Sphere{floor, main}
+	floor := Sphere{Vector{0, -100.5, -1}, 100, Material{Vector{0.8, 0.8, 0.0}, "lambertian"}}
+	//main := Sphere{Vector{1, 0, -1}, 0.5}
+	//main2 := Sphere{Vector{-0.5, 0, -1}, 0.5}
+	sphereList := []Sphere{
+		floor,
+		{Vector{1, 0, -1}, 0.5, Material{Vector{0.8, 0.6, 0.2}, "metal"}},
+		{Vector{-1, 0, -1}, 0.5, Material{Vector{0.8, 0.8, 0.8}, "metal"}},
+		{Vector{0, 0, -1}, 0.5, Material{Vector{0.8, 0.3, 0.3}, "lambertian"}},
+	}
 	for j := ny - 1; j >= 0; j-- {
 		for i := 0; i < nx; i++ {
 			col := Vector{0, 0, 0}
@@ -82,10 +99,10 @@ func main() {
 
 				r := camera.GetRay(u, v)
 				//p :=r.pointAt(2.0)
-				col = col.Add(colour(r, sphereList))
+				col = col.Add(colour(r, sphereList, 0))
 			}
-			col = col.MultiplyByScalar(0.01)
-
+			col = col.DivideByScalar(float64(ns))
+			col = Vector{math.Sqrt(col.X), math.Sqrt(col.Y), math.Sqrt(col.Z)}
 			ir := int(255.99 * col.X)
 			ig := int(255.99 * col.Y)
 			ib := int(255.99 * col.Z)
