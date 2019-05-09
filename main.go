@@ -52,7 +52,7 @@ func colour(r Ray, objs []Sphere, depth int) Vector {
 
 func WorldHit(objs []Sphere, r Ray) (bool, Vector, Vector, Sphere) {
 	max := math.MaxFloat64
-	min := 0.0001
+	min := 0.001
 	hitAnything := false
 	normal := Vector{}
 	p := Vector{}
@@ -71,9 +71,9 @@ func WorldHit(objs []Sphere, r Ray) (bool, Vector, Vector, Sphere) {
 }
 
 func main() {
-	nx := 800
-	ny := 400
-	ns := 400
+	nx := 1920
+	ny := 1080
+	ns := 200
 	d1 := []byte("P3\n" + strconv.Itoa(nx) + " " + strconv.Itoa(ny) + "\n" + strconv.Itoa(255) + "\n")
 
 	lowerLeftCorner := Vector{-2.0, -1.0, -1.0}
@@ -83,14 +83,15 @@ func main() {
 
 	camera := Camera{lowerLeftCorner, horizontal, vertical, origin}
 
-	floor := Sphere{Vector{0, -100.5, -1}, 100, Material{Vector{0.8, 0.8, 0.0}, "lambertian"}}
+	floor := Sphere{Vector{0, -100.5, -1}, 100, Material{Vector{0.8, 0.8, 0.0}, "lambertian", 0}}
 	//main := Sphere{Vector{1, 0, -1}, 0.5}
 	//main2 := Sphere{Vector{-0.5, 0, -1}, 0.5}
 	sphereList := []Sphere{
 		floor,
-		{Vector{1, 0, -1}, 0.5, Material{Vector{0.8, 0.6, 0.2}, "metal"}},
-		{Vector{-1, 0, -1}, 0.5, Material{Vector{0.8, 0.8, 0.8}, "metal"}},
-		{Vector{0, 0, -1}, 0.5, Material{Vector{0.8, 0.3, 0.3}, "lambertian"}},
+		{Vector{1, 0, -1}, 0.5, Material{Vector{0.8, 0.6, 0.2}, "metal", 1.0}},
+		{Vector{-1, 0, -1}, 0.5, Material{Vector{1.5, 0.8, 0.8}, "dielectric", 0.3}},
+		{Vector{-1, 0, -1}, -0.45, Material{Vector{1.5, 0.8, 0.8}, "dielectric", 0.3}},
+		{Vector{0, 0, -1}, 0.5, Material{Vector{0.8, 0.3, 0.3}, "lambertian", 0}},
 	}
 	start := time.Now()
 	fmt.Printf("\nRendering...")
