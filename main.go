@@ -12,41 +12,46 @@ func check(e error) {
 	}
 }
 
-func hitSphere(center Vector, radius float64, r Ray) float64 {
-	oc := r.origin().Sub(center)
-	a := r.direction().Dot(r.direction())
-	b := 2.0 * oc.Dot(r.direction())
-	c := oc.Dot(oc) - radius*radius
-	discriminant := b*b - 4*a*c
-	if discriminant < 0 {
-		return -1.0
+func colour(r Ray, objs []Sphere) Vector {
+	max := math.MaxFloat64
+	min := 0.0
+	hitAnything := false
+	normal := Vector{}
+	//pSomething := Vector{}
+	for _, elem := range objs {
+		hit, t, _, N := elem.hitSphere(r, min, max)
+		if hit {
+			hitAnything = true
+			max = t
+			normal = N
+			//pSomething = p
+			//N := r.pointAt(t).Sub(Vector{0, 0, -1}).Normalize()
+			//return Vector{N.X + 1, N.Y + 1, N.Z + 1}.MultiplyByScalar(0.5)
+		}
+	}
+	if hitAnything {
+		return Vector{normal.X + 1, normal.Y + 1, normal.Z + 1}.MultiplyByScalar(0.5)
 	} else {
-		return (-b - math.Sqrt(discriminant)) / (2.0 * a)
+		unitDir := r.direction().Normalize()
+		t := 0.5 * (unitDir.Y + 1.0)
+		colour := Vector{1.0, 1.0, 1.0}.MultiplyByScalar(1.0 - t)
+		colour = colour.Add(Vector{0.5, 0.7, 1.0}.MultiplyByScalar(t))
+		return colour
 	}
 
-}
-
-func colour(r Ray) Vector {
-	t := hitSphere(Vector{0, 0, -1}, 0.5, r)
-	if t > 0.0 {
-		N := r.pointAt(t).Sub(Vector{0, 0, -1}).Normalize()
-		return Vector{N.X + 1, N.Y + 1, N.Z + 1}.MultiplyByScalar(0.5)
-	}
-	unitDir := r.direction().Normalize()
-	t = 0.5 * (unitDir.Y + 1.0)
-	colour := Vector{1.0, 1.0, 1.0}.MultiplyByScalar(1.0 - t)
-	colour = colour.Add(Vector{0.5, 0.7, 1.0}.MultiplyByScalar(t))
-	return colour
 }
 
 func main() {
-	nx := 400
-	ny := 200
+	nx := 800
+	ny := 400
 	d1 := []byte("P3\n" + strconv.Itoa(nx) + " " + strconv.Itoa(ny) + "\n" + strconv.Itoa(255) + "\n")
 	lowerLeftCorner := Vector{-2.0, -1.0, -1.0}
 	horizontal := Vector{4.0, 0.0, 0.0}
 	vertical := Vector{0.0, 2.0, 0.0}
 	origin := Vector{0.0, 0.0, 0.0}
+	floor := Sphere{Vector{0, -100.5, -1}, 100}
+	main := Sphere{Vector{0, 0, -1}, 0.5}
+	sphereList := []Sphere{floor, main}
 	for j := ny - 1; j >= 0; j-- {
 		for i := 0; i < nx; i++ {
 
@@ -56,7 +61,7 @@ func main() {
 			direction = direction.Add(vertical.MultiplyByScalar(v))
 
 			r := Ray{origin, direction}
-			col := colour(r)
+			col := colour(r, sphereList)
 
 			ir := int(255.99 * col.X)
 			ig := int(255.99 * col.Y)
