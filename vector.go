@@ -34,6 +34,10 @@ func (a Vector) Length() float64 {
 	return math.Sqrt(a.Dot(a))
 }
 
+func (a Vector) SquaredLength() float64 {
+	return a.Dot(a)
+}
+
 func (a Vector) Cross(b Vector) Vector {
 	return Vector{
 		X: a.Y*b.Z - a.Z*b.Y,

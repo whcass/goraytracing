@@ -13,25 +13,40 @@ func check(e error) {
 	}
 }
 
+func RandInUnitSphere() Vector {
+	p := Vector{}
+	for {
+		p = Vector{rand.Float64(), rand.Float64(), rand.Float64()}.MultiplyByScalar(2.0)
+		p = p.Sub(Vector{1.0, 1.0, 1.0})
+		if !(p.SquaredLength() >= 1.0) {
+			break
+		}
+	}
+	return p
+}
+
 func colour(r Ray, objs []Sphere) Vector {
 	max := math.MaxFloat64
 	min := 0.0
 	hitAnything := false
 	normal := Vector{}
-	//pSomething := Vector{}
+	p := Vector{}
 	for _, elem := range objs {
-		hit, t, _, N := elem.hitSphere(r, min, max)
+		hit, t, a, N := elem.hitSphere(r, min, max)
 		if hit {
 			hitAnything = true
 			max = t
 			normal = N
-			//pSomething = p
+			p = a
 			//N := r.pointAt(t).Sub(Vector{0, 0, -1}).Normalize()
 			//return Vector{N.X + 1, N.Y + 1, N.Z + 1}.MultiplyByScalar(0.5)
 		}
 	}
 	if hitAnything {
-		return Vector{normal.X + 1, normal.Y + 1, normal.Z + 1}.MultiplyByScalar(0.5)
+		target := p.Add(normal)
+		target = target.Add(RandInUnitSphere())
+		return colour(Ray{p, target.Sub(p)}, objs).MultiplyByScalar(0.5)
+		//return Vector{normal.X + 1, normal.Y + 1, normal.Z + 1}.MultiplyByScalar(0.5)
 	} else {
 		unitDir := r.direction().Normalize()
 		t := 0.5 * (unitDir.Y + 1.0)
