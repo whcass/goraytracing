@@ -1,10 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"math"
 	"math/rand"
 	"strconv"
+	"time"
 )
 
 func check(e error) {
@@ -71,7 +73,7 @@ func WorldHit(objs []Sphere, r Ray) (bool, Vector, Vector, Sphere) {
 func main() {
 	nx := 800
 	ny := 400
-	ns := 200
+	ns := 400
 	d1 := []byte("P3\n" + strconv.Itoa(nx) + " " + strconv.Itoa(ny) + "\n" + strconv.Itoa(255) + "\n")
 
 	lowerLeftCorner := Vector{-2.0, -1.0, -1.0}
@@ -90,6 +92,8 @@ func main() {
 		{Vector{-1, 0, -1}, 0.5, Material{Vector{0.8, 0.8, 0.8}, "metal"}},
 		{Vector{0, 0, -1}, 0.5, Material{Vector{0.8, 0.3, 0.3}, "lambertian"}},
 	}
+	start := time.Now()
+	fmt.Printf("\nRendering...")
 	for j := ny - 1; j >= 0; j-- {
 		for i := 0; i < nx; i++ {
 			col := Vector{0, 0, 0}
@@ -111,6 +115,7 @@ func main() {
 
 		}
 	}
+	fmt.Printf("\nDone. Elapsed: %v", time.Since(start))
 	err := ioutil.WriteFile("image.ppm", d1, 0644)
 	check(err)
 }
