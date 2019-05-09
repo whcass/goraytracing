@@ -3,6 +3,7 @@ package main
 import (
 	"io/ioutil"
 	"math"
+	"math/rand"
 	"strconv"
 )
 
@@ -44,24 +45,31 @@ func colour(r Ray, objs []Sphere) Vector {
 func main() {
 	nx := 800
 	ny := 400
+	ns := 100
 	d1 := []byte("P3\n" + strconv.Itoa(nx) + " " + strconv.Itoa(ny) + "\n" + strconv.Itoa(255) + "\n")
+
 	lowerLeftCorner := Vector{-2.0, -1.0, -1.0}
 	horizontal := Vector{4.0, 0.0, 0.0}
 	vertical := Vector{0.0, 2.0, 0.0}
 	origin := Vector{0.0, 0.0, 0.0}
+
+	camera := Camera{lowerLeftCorner, horizontal, vertical, origin}
+
 	floor := Sphere{Vector{0, -100.5, -1}, 100}
 	main := Sphere{Vector{0, 0, -1}, 0.5}
 	sphereList := []Sphere{floor, main}
 	for j := ny - 1; j >= 0; j-- {
 		for i := 0; i < nx; i++ {
+			col := Vector{0, 0, 0}
+			for s := 0; s < ns; s++ {
+				u := (float64(i) + rand.Float64()) / float64(nx)
+				v := (float64(j) + rand.Float64()) / float64(ny)
 
-			u := float64(i) / float64(nx)
-			v := float64(j) / float64(ny)
-			direction := lowerLeftCorner.Add(horizontal.MultiplyByScalar(u))
-			direction = direction.Add(vertical.MultiplyByScalar(v))
-
-			r := Ray{origin, direction}
-			col := colour(r, sphereList)
+				r := camera.GetRay(u, v)
+				//p :=r.pointAt(2.0)
+				col = col.Add(colour(r, sphereList))
+			}
+			col = col.MultiplyByScalar(0.01)
 
 			ir := int(255.99 * col.X)
 			ig := int(255.99 * col.Y)

@@ -10,9 +10,9 @@ type Sphere struct {
 func (s Sphere) hitSphere(r Ray, min float64, max float64) (bool, float64, Vector, Vector) {
 	oc := r.origin().Sub(s.Center)
 	a := r.direction().Dot(r.direction())
-	b := 2.0 * oc.Dot(r.direction())
+	b := oc.Dot(r.direction())
 	c := oc.Dot(oc) - s.r*s.r
-	discriminant := b*b - 4*a*c
+	discriminant := b*b - a*c
 	if discriminant > 0 {
 		temp := (-b - math.Sqrt(b*b-a*c)) / a
 		if temp < max && temp > min {
