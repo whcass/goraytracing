@@ -71,18 +71,19 @@ func WorldHit(objs []Sphere, r Ray) (bool, Vector, Vector, Sphere) {
 }
 
 func main() {
-	nx := 1920
-	ny := 1080
-	ns := 200
+	nx := 1600
+	ny := 800
+	ns := 400
 	d1 := []byte("P3\n" + strconv.Itoa(nx) + " " + strconv.Itoa(ny) + "\n" + strconv.Itoa(255) + "\n")
 
-	lowerLeftCorner := Vector{-2.0, -1.0, -1.0}
-	horizontal := Vector{4.0, 0.0, 0.0}
-	vertical := Vector{0.0, 2.0, 0.0}
-	origin := Vector{0.0, 0.0, 0.0}
+	//lowerLeftCorner := Vector{-2.0, -1.0, -1.0}
+	//horizontal := Vector{4.0, 0.0, 0.0}
+	//vertical := Vector{0.0, 2.0, 0.0}
+	//origin := Vector{0.0, 0.0, 0.0}
 
-	camera := Camera{lowerLeftCorner, horizontal, vertical, origin}
-
+	//camera := Camera{lowerLeftCorner, horizontal, vertical, origin}
+	//camera := NewCamera(90,float64(nx)/float64(ny))
+	camera := NewCamera(Vector{-2,2,1},Vector{0,0,-1},Vector{0,1,0},90,float64(nx)/float64(ny))
 	floor := Sphere{Vector{0, -100.5, -1}, 100, Material{Vector{0.8, 0.8, 0.0}, "lambertian", 0}}
 	//main := Sphere{Vector{1, 0, -1}, 0.5}
 	//main2 := Sphere{Vector{-0.5, 0, -1}, 0.5}
