@@ -71,9 +71,9 @@ func WorldHit(objs []Sphere, r Ray) (bool, Vector, Vector, Sphere) {
 }
 
 func main() {
-	nx := 1600
-	ny := 800
-	ns := 400
+	nx := 1000
+	ny := 500
+	ns := 200
 	d1 := []byte("P3\n" + strconv.Itoa(nx) + " " + strconv.Itoa(ny) + "\n" + strconv.Itoa(255) + "\n")
 
 	//lowerLeftCorner := Vector{-2.0, -1.0, -1.0}
@@ -83,19 +83,21 @@ func main() {
 
 	//camera := Camera{lowerLeftCorner, horizontal, vertical, origin}
 	//camera := NewCamera(90,float64(nx)/float64(ny))
-	camera := NewCamera(Vector{-2,2,1},Vector{0,0,-1},Vector{0,1,0},90,float64(nx)/float64(ny))
+	camera := NewCamera(Vector{-2,2,1},Vector{0,0,-1},Vector{0,1,0},45,float64(nx)/float64(ny))
 	floor := Sphere{Vector{0, -100.5, -1}, 100, Material{Vector{0.8, 0.8, 0.0}, "lambertian", 0}}
 	//main := Sphere{Vector{1, 0, -1}, 0.5}
 	//main2 := Sphere{Vector{-0.5, 0, -1}, 0.5}
 	sphereList := []Sphere{
 		floor,
-		{Vector{1, 0, -1}, 0.5, Material{Vector{0.8, 0.6, 0.2}, "metal", 1.0}},
+		{Vector{1, 0, -1}, 0.5, Material{Vector{0.8, 0.8, 0.8}, "metal", 0.0}},
 		{Vector{-1, 0, -1}, 0.5, Material{Vector{1.5, 0.8, 0.8}, "dielectric", 0.3}},
 		{Vector{-1, 0, -1}, -0.45, Material{Vector{1.5, 0.8, 0.8}, "dielectric", 0.3}},
 		{Vector{0, 0, -1}, 0.5, Material{Vector{0.8, 0.3, 0.3}, "lambertian", 0}},
 	}
 	start := time.Now()
-	fmt.Printf("\nRendering...")
+	fmt.Printf("\nRendering...\n")
+	total := nx*ny
+	count := 0
 	for j := ny - 1; j >= 0; j-- {
 		for i := 0; i < nx; i++ {
 			col := Vector{0, 0, 0}
@@ -114,7 +116,12 @@ func main() {
 			ib := int(255.99 * col.Z)
 			line := []byte(strconv.Itoa(ir) + " " + strconv.Itoa(ig) + " " + strconv.Itoa(ib) + "\n")
 			d1 = append(d1, line...)
-
+			//fmt.Println()
+			count++
+			percent := float64(count)/float64(total)*100
+			fmt.Printf("\r%d/%d - %.2f%%",count,total,percent)
+			//fmt.Println()
+			
 		}
 	}
 	fmt.Printf("\nDone. Elapsed: %v", time.Since(start))
